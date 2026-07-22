@@ -826,6 +826,22 @@ function getCatColor(catId) { const c = getCat(catId); return c ? c.color : '#b0
 function getCatName(catId) { const c = getCat(catId); return c ? c.name : 'Uncategorised'; }
 function getCatIcon(catId) { const c = getCat(catId); return c && c.icon ? c.icon : ''; }
 
+// WCAG relative luminance -> pick whichever of white/dark text has better contrast
+function relLuminance(hex) {
+  hex = hex.replace('#', '');
+  const toLin = (c) => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+  const r = toLin(parseInt(hex.substr(0, 2), 16));
+  const g = toLin(parseInt(hex.substr(2, 2), 16));
+  const b = toLin(parseInt(hex.substr(4, 2), 16));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+function bestTextColor(hex) {
+  const lum = relLuminance(hex);
+  const contrastWhite = 1.05 / (lum + 0.05);
+  const contrastDark = (lum + 0.05) / 0.05;
+  return contrastWhite >= contrastDark ? '#ffffff' : '#2a2018';
+}
+
 function localDateStr(d) {
   d = d || new Date();
   const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
@@ -1020,19 +1036,20 @@ function renderWheel() {
     segG.setAttribute('data-slot', String(i));
     segG.style.cursor = 'pointer';
 
-    // Segment fill
+    // Segment fill — solid, vivid colour per category (not a pale tint)
     const path = document.createElementNS(SVG_NS, 'path');
     path.setAttribute('d', segPath(i, WHEEL_SLOTS, WHEEL_R, INNER_R));
     const color = task ? getCatColor(task.catId) : '#e8d8c4';
-    path.setAttribute('fill', task ? color + '33' : '#f5ede0');
-    path.setAttribute('stroke', task ? color : 'var(--border)');
-    path.setAttribute('stroke-width', '1.5');
-    path.style.transition = 'fill 0.2s, stroke 0.2s';
+    const textColor = task ? bestTextColor(color) : 'var(--text3)';
+    path.setAttribute('fill', task ? color : '#f5ede0');
+    path.setAttribute('stroke', task ? '#fdf6ee' : 'var(--border)');
+    path.setAttribute('stroke-width', task ? '2.5' : '1.5');
+    path.style.transition = 'filter 0.15s';
     segG.appendChild(path);
 
     if (task) {
       // Task label
-      const textG = textOnSeg(i, WHEEL_SLOTS, task.name, color);
+      const textG = textOnSeg(i, WHEEL_SLOTS, task.name, textColor);
       segG.appendChild(textG);
 
       // Category icon badge near the hub (colour isn't the only cue)
@@ -1069,8 +1086,8 @@ function renderWheel() {
         hint.setAttribute('y', String(hy));
         hint.setAttribute('text-anchor', 'middle');
         hint.setAttribute('dominant-baseline', 'middle');
-        hint.setAttribute('fill', color);
-        hint.setAttribute('fill-opacity', '0.7');
+        hint.setAttribute('fill', textColor);
+        hint.setAttribute('fill-opacity', '0.75');
         hint.setAttribute('font-size', '7.5');
         hint.setAttribute('font-weight', '700');
         hint.setAttribute('font-family', 'Nunito, sans-serif');
@@ -1101,10 +1118,10 @@ function renderWheel() {
 
       // Hover highlight
       segG.addEventListener('mouseenter', () => {
-        path.setAttribute('fill', color + '55');
+        path.style.filter = 'brightness(1.12)';
       });
       segG.addEventListener('mouseleave', () => {
-        path.setAttribute('fill', color + '33');
+        path.style.filter = '';
       });
 
     } else {
