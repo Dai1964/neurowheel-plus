@@ -1,0 +1,17 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="96" fill="#fdf6ee"/>
+  <circle cx="100" cy="100" r="88" fill="none" stroke="#e8d8c4" stroke-width="4"/>
+  <g stroke="#e8d8c4" stroke-width="3">
+    <path d="M100 20 L100 180" />
+    <path d="M20 100 L180 100" />
+    <path d="M43 43 L157 157" />
+    <path d="M157 43 L43 157" />
+  </g>
+  <path d="M100 20 A80 80 0 0 1 156.6 43.4 L100 100 Z" fill="#5ab88a" opacity="0.55"/>
+  <path d="M156.6 43.4 A80 80 0 0 1 180 100 L100 100 Z" fill="#4a9abf" opacity="0.55"/>
+  <path d="M180 100 A80 80 0 0 1 156.6 156.6 L100 100 Z" fill="#e07a3a" opacity="0.55"/>
+  <path d="M156.6 156.6 A80 80 0 0 1 100 180 L100 100 Z" fill="#e8a0c0" opacity="0.55"/>
+  <path d="M100 180 A80 80 0 0 1 43.4 156.6 L100 100 Z" fill="#c9a84c" opacity="0.55"/>
+  <circle cx="100" cy="100" r="28" fill="#fffaf4" stroke="#e8d8c4" stroke-width="3"/>
+  <text x="100" y="110" text-anchor="middle" font-size="30" font-family="sans-serif">🎡</text>
+</svg>

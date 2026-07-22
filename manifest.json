@@ -1,0 +1,13 @@
+{
+  "name": "NeuroWheel+",
+  "short_name": "NeuroWheel+",
+  "description": "A gentle task wheel that picks for you, so deciding what to do next isn't the hard part.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fdf6ee",
+  "theme_color": "#e07a3a",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
