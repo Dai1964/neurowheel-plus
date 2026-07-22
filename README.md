@@ -14,3 +14,7 @@ The original stays untouched and simple. This version adds:
 - **Fixes** — the task timer now survives closing the detail popup, "Done" has an Undo, and long task names get an ellipsis instead of silently clipping.
 
 Open `index.html` in a browser to use it — no build step, no server required.
+
+## iOS
+
+Works fine in Safari on iPhone/iPad, and "Add to Home Screen" installs it as a standalone app icon (using `apple-touch-icon.png`, since iOS doesn't support SVG manifest icons for that). One real gap: iOS only supports web notifications for a site added to the Home Screen, and only from iOS 16.4+ — reminders won't fire in a regular Safari tab, and even installed, they only work while the app is actually open in the foreground (iOS suspends background tabs aggressively). Everything else — the wheel, spin, timer, stats, backup/restore — works the same as on desktop/Android.
