@@ -862,17 +862,27 @@ function fillWheel() {
   // Make sure wheel array is length 8
   while (state.wheel.length < WHEEL_SLOTS) state.wheel.push(null);
   state.wheel = state.wheel.slice(0, WHEEL_SLOTS);
-  // Fill null slots from pool, preferring the current energy filter
+
+  // Work out which slots need filling, and how categories are already represented
+  const emptySlots = [];
+  const catCounts = {};
+  state.wheel.forEach((taskId, i) => {
+    const t = taskId ? getTask(taskId) : null;
+    if (t) catCounts[t.catId] = (catCounts[t.catId] || 0) + 1;
+    else emptySlots.push(i);
+  });
+  if (!emptySlots.length) { saveState(); return; }
+
+  // Fill from pool, preferring the current energy filter, spread across categories
   const pool = poolTasks();
   const matching = shuffle(pool.filter(matchesEnergyFilter));
   const rest = shuffle(pool.filter(t => !matchesEnergyFilter(t)));
-  const ordered = [...matching, ...rest];
-  for (let i = 0; i < WHEEL_SLOTS; i++) {
-    if (!state.wheel[i] || !getTask(state.wheel[i])) {
-      const next = ordered.shift();
-      state.wheel[i] = next ? next.id : null;
-    }
-  }
+  const candidates = [...matching, ...rest];
+  const picks = pickBalanced(candidates, emptySlots.length, catCounts);
+  emptySlots.forEach((slotIndex, idx) => {
+    state.wheel[slotIndex] = picks[idx] ? picks[idx].id : null;
+  });
+
   saveState();
 }
 
@@ -883,6 +893,26 @@ function shuffle(arr) {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+
+// Greedily picks `count` tasks from `candidates`, always taking next from
+// whichever category is currently least represented — spreads categories
+// across the wheel instead of letting one clump up by chance.
+function pickBalanced(candidates, count, initialCounts) {
+  const pool = [...candidates];
+  const counts = Object.assign({}, initialCounts);
+  const picked = [];
+  while (picked.length < count && pool.length) {
+    let bestIdx = 0, bestCount = Infinity;
+    for (let k = 0; k < pool.length; k++) {
+      const c = counts[pool[k].catId] || 0;
+      if (c < bestCount) { bestCount = c; bestIdx = k; if (c === 0) break; }
+    }
+    const [t] = pool.splice(bestIdx, 1);
+    picked.push(t);
+    counts[t.catId] = (counts[t.catId] || 0) + 1;
+  }
+  return picked;
 }
 
 function uid() { return 'id' + Date.now() + Math.random().toString(36).slice(2); }
@@ -1298,8 +1328,8 @@ function undoLastDone() {
 }
 
 document.getElementById('shuffleAllBtn').addEventListener('click', () => {
-  const all = shuffle([...state.tasks]);
-  state.wheel = all.slice(0, WHEEL_SLOTS).map(t => t.id);
+  const picks = pickBalanced(shuffle([...state.tasks]), WHEEL_SLOTS, {});
+  state.wheel = picks.map(t => t.id);
   saveState();
   renderWheel();
   toast('🔀 Wheel shuffled!');
@@ -1318,7 +1348,8 @@ function applyEnergyFilter() {
   const matching = shuffle(state.tasks.filter(matchesEnergyFilter));
   const rest = shuffle(state.tasks.filter(t => !matchesEnergyFilter(t)));
   const combined = [...matching, ...rest];
-  state.wheel = combined.slice(0, WHEEL_SLOTS).map(t => t.id);
+  const picks = pickBalanced(combined, WHEEL_SLOTS, {});
+  state.wheel = picks.map(t => t.id);
   saveState();
   renderWheel();
   toast(state.energyFilter === 'any' ? '✨ Showing any energy level' : 'Showing more ' + state.energyFilter + '-energy tasks');
