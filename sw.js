@@ -1,4 +1,4 @@
-const CACHE = 'neurowheel-plus-v3';
+const CACHE = 'neurowheel-plus-v4';
 const ASSETS = ['./', './index.html', './manifest.json', './icon.svg', './apple-touch-icon.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (e) => {
@@ -17,7 +17,7 @@ self.addEventListener('fetch', (e) => {
   // Network-first: always prefer the live version when online, so updates
   // show up immediately. Only fall back to the cache when offline.
   e.respondWith(
-    fetch(e.request)
+    fetch(e.request, { cache: 'no-store' })
       .then((res) => {
         const copy = res.clone();
         caches.open(CACHE).then((c) => c.put(e.request, copy));
