@@ -803,7 +803,12 @@ function loadState() {
 }
 
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  // Some in-app browsers (WhatsApp, Instagram, etc.) restrict or block
+  // localStorage. If it throws, keep working in-memory for this session
+  // rather than silently breaking every button that saves after acting.
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {}
 }
 
 // Reset "today" counters on a new day (history in dailyCounts is kept forever)
