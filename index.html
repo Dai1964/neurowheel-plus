@@ -140,18 +140,30 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
   color: var(--text3);
-  gap: 2px;
+  gap: 3px;
+  padding: 6px;
   transition: transform 0.15s, background 0.15s;
   z-index: 5;
 }
-.centre-btn:hover, .centre-btn:active { transform: scale(0.92); background: var(--bg); }
+.centre-btn:hover, .centre-btn:active { transform: scale(0.96); background: var(--bg); }
 .centre-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-.centre-icon { font-size: 1.4rem; }
+.centre-brand {
+  font-family: 'Lora', serif;
+  font-size: 1.15rem;
+  line-height: 1.15;
+  color: var(--text);
+  text-align: center;
+}
+.centre-brand-accent { font-style: italic; color: var(--accent); }
+.centre-spin {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-top: 2px;
+}
 
 .done-count {
   position: absolute;
@@ -648,8 +660,8 @@ body {
     <div class="wheel-pointer" aria-hidden="true"></div>
     <svg id="wheelSvg" viewBox="-200 -200 400 400" xmlns="http://www.w3.org/2000/svg"></svg>
     <button class="centre-btn" id="centreBtn" aria-label="Spin the wheel to pick a random task">
-      <span class="centre-icon">🎡</span>
-      <span id="centreLabel">Spin</span>
+      <span class="centre-brand">Neuro<span class="centre-brand-accent">Wheel+</span></span>
+      <span class="centre-spin" id="centreSpinLabel">🎡 Spin</span>
     </button>
   </div>
 
@@ -736,7 +748,10 @@ body {
 // ─────────────────────────────────────────────
 const WHEEL_SLOTS = 8;
 const WHEEL_R = 170;
-const INNER_R = 68;
+const INNER_R = 84;
+// Fixed rainbow gradient by wheel position (not by category) — every slice
+// gets its own distinct hue, matching the "coping skills wheel" reference look.
+const FIXED_RAINBOW = ['#f0553f', '#f2913c', '#f5c518', '#8bc540', '#17b9d6', '#b980dd', '#d6338a', '#d31659'];
 const STORAGE_KEY = 'neurowheel_plus_v1';
 
 let state = loadState();
@@ -1027,8 +1042,8 @@ function textOnSeg(index, total, text, color) {
     t.setAttribute('text-anchor', 'middle');
     t.setAttribute('dominant-baseline', 'middle');
     t.setAttribute('fill', color);
-    t.setAttribute('font-size', '9.5');
-    t.setAttribute('font-weight', '700');
+    t.setAttribute('font-size', '10.5');
+    t.setAttribute('font-weight', '800');
     t.setAttribute('font-family', 'Nunito, sans-serif');
     t.textContent = line;
     g.appendChild(t);
@@ -1071,14 +1086,16 @@ function renderWheel() {
     segG.setAttribute('data-slot', String(i));
     segG.style.cursor = 'pointer';
 
-    // Segment fill — solid, vivid colour per category (not a pale tint)
+    // Segment fill — a fixed rainbow hue per wheel position, so every slice
+    // reads as a distinct colour regardless of the task's category
     const path = document.createElementNS(SVG_NS, 'path');
     path.setAttribute('d', segPath(i, WHEEL_SLOTS, WHEEL_R, INNER_R));
-    const color = task ? getCatColor(task.catId) : '#e8d8c4';
+    const color = task ? FIXED_RAINBOW[i % FIXED_RAINBOW.length] : '#e8d8c4';
     const textColor = task ? bestTextColor(color) : 'var(--text3)';
     path.setAttribute('fill', task ? color : '#f5ede0');
-    path.setAttribute('stroke', task ? '#fdf6ee' : 'var(--border)');
-    path.setAttribute('stroke-width', task ? '2.5' : '1.5');
+    path.setAttribute('stroke', task ? '#ffffff' : 'var(--border)');
+    path.setAttribute('stroke-width', task ? '3' : '1.5');
+    if (task) path.setAttribute('stroke-dasharray', '7 6');
     path.style.transition = 'filter 0.15s';
     segG.appendChild(path);
 
@@ -1213,7 +1230,7 @@ function sizeSvg() {
   svg.style.height = size + 'px';
   // Centre button
   const cb = document.querySelector('.centre-btn');
-  const btnSize = Math.max(60, size * 0.17);
+  const btnSize = Math.max(100, size * 0.38);
   cb.style.width = btnSize + 'px';
   cb.style.height = btnSize + 'px';
 }
@@ -1237,7 +1254,7 @@ function spinWheel() {
   spinning = true;
   const centreBtn = document.getElementById('centreBtn');
   centreBtn.style.pointerEvents = 'none';
-  document.getElementById('centreLabel').textContent = '…';
+  document.getElementById('centreSpinLabel').textContent = '…';
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sliceDeg = 360 / WHEEL_SLOTS;
@@ -1255,7 +1272,7 @@ function spinWheel() {
   setTimeout(() => {
     spinning = false;
     centreBtn.style.pointerEvents = '';
-    document.getElementById('centreLabel').textContent = 'Spin';
+    document.getElementById('centreSpinLabel').textContent = '🎡 Spin';
     openTaskDetail(target.id, target.i);
   }, duration + 80);
 }
