@@ -747,11 +747,11 @@ let lastDoneAction = null;
 function defaultState() {
   return {
     categories: [
-      { id: 'c1', name: 'Quick win',   color: '#5ab88a', icon: '⚡' },
-      { id: 'c2', name: 'Brain work',  color: '#4a9abf', icon: '🧠' },
-      { id: 'c3', name: 'Admin',       color: '#e07a3a', icon: '📋' },
-      { id: 'c4', name: 'Self-care',   color: '#e8a0c0', icon: '💛' },
-      { id: 'c5', name: 'Home',        color: '#c9a84c', icon: '🏠' },
+      { id: 'c1', name: 'Quick win',   color: '#22c55e', icon: '⚡' },
+      { id: 'c2', name: 'Brain work',  color: '#3b82f6', icon: '🧠' },
+      { id: 'c3', name: 'Admin',       color: '#f97316', icon: '📋' },
+      { id: 'c4', name: 'Self-care',   color: '#ec4899', icon: '💛' },
+      { id: 'c5', name: 'Home',        color: '#eab308', icon: '🏠' },
     ],
     tasks: [
       { id:'t1', name:'Make a cup of tea ☕', catId:'c1', energy:'low', history:[] },
@@ -1708,7 +1708,7 @@ document.getElementById('addCatBtn').addEventListener('click', () => {
   const inp = document.getElementById('newCatInput');
   const name = inp.value.trim();
   if (!name) return;
-  const colors = ['#9a80c0','#d07090','#6dbf9e','#7ab3d4','#e8832a'];
+  const colors = ['#a855f7','#ef4444','#14b8a6','#06b6d4','#f43f5e'];
   const color = colors[state.categories.length % colors.length];
   state.categories.push({ id: uid(), name, color, icon: '⭐' });
   inp.value = '';
